@@ -24,14 +24,15 @@
   </div>
 </template>
 <script>
+import { Message } from 'element-ui'
 export default {
   name: 'Login',
   data() {
     return {
       loginForm: {
-        mobile: '',
-        password: '',
-        isAgree: false
+        mobile: process.env.NODE_ENV === 'development' ? '13800000002' : '',
+        password: process.env.NODE_ENV === 'development' ? 'hm#qd@23!' : '',
+        isAgree: process.env.NODE_ENV === 'development'
       },
       // 表单验证规则
       rules: {
@@ -61,11 +62,13 @@ export default {
   methods: {
     login() {
       // 1. 校验表单数据是否合法
-      this.$refs.form.validate(valid => {
+      this.$refs.form.validate(async valid => {
         // 表单校验失败
         if (!valid) return
         // 表单校验成功
-        this.$store.dispatch('user/login', this.loginForm)
+        await this.$store.dispatch('user/login', this.loginForm)
+        Message.success('登录成功')
+        this.$router.push('/')
       })
     }
   }
