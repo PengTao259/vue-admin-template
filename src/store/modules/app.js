@@ -26,6 +26,7 @@ const mutations = {
   TOGGLE_DEVICE: (state, device) => {
     state.device = device
   }
+
 }
 
 const actions = {
