@@ -30,6 +30,12 @@ const actions = {
     await getUserInfo().then(res => {
       commit('setUserInfo', res)
     })
+  },
+  // 退出登录
+  logout({ commit }) {
+    commit('removeToken')
+    // 清除用户信息
+    commit('setUserInfo', {})
   }
 }
 
