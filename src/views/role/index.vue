@@ -3,44 +3,113 @@
     <div class="app-container">
       <!-- 角色管理内容 -->
       <div class="role-operate">
-        <el-button size="mini" type="primary">添加角色</el-button>
+        <el-button size="mini" type="primary" @click="showDialog = true">添加角色</el-button>
       </div>
       <!-- 放置table组件 -->
       <el-table
         :data="tableData"
       >
         <!-- 放置列 -->
-        <el-table-column prop="name" align="center" width="200" label="角色" />
+        <el-table-column prop="name" align="center" width="200" label="角色">
+          <template v-slot="{ row }">
+            <!-- 条件判断 -->
+            <el-input
+              v-if="row.editFlag"
+              v-model="row.name"
+              size="mini"
+            />
+            <span v-else>{{ row.name }}</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="state" align="center" width="200" label="启用">
           <template v-slot="{ row }">
-            {{ row.state === 1 ? '启用' : row.state === 0 ? '禁用' : '无' }}
+            <el-switch
+              v-if="row.editFlag"
+            />
+            <span v-else>
+              {{ row.state === 1 ? '启用' : row.state === 0 ? '禁用' : '无' }}
+            </span>
           </template>
         </el-table-column>
         <el-table-column prop="description" align="center" label="描述" />
         <el-table-column align="center" label="操作">
           <template v-slot="{ row }">
-            <el-button size="mini" type="primary" @click="edit(row.id)">编辑</el-button>
-            <el-button size="mini" type="danger">删除</el-button>
+            <el-button size="mini" type="primary" @click="edit(row)">{{ row.editFlag === false ? '编辑': '确认' }}</el-button>
+            <el-button
+              size="mini"
+              type="danger"
+              @click="del(row.id)"
+            >删除</el-button>
           </template>
         </el-table-column>
       </el-table>
       <!-- 放置分页组件 -->
       <el-row type="flex" style="height:60px" align="middle" justify="end">
         <!-- 放置分页组件 -->
-        <el-pagination layout="prev, pager, next" />
+        <el-pagination
+          :page-size="pageParams.pagesize"
+          :current-page="pageParams.page"
+          :total="pageParams.total"
+          layout="prev, pager, next"
+          @current-change="changePage"
+        />
       </el-row>
     </div>
+    <!-- 放置弹窗 -->
+    <el-dialog width="500px" title="新增角色" :visible.sync="showDialog" @close="btnCancel">
+      <!-- 表单内容 -->
+      <el-form
+        ref="roleForm"
+        :model="roleForm"
+        label-width="120px"
+        :rules="rules"
+      >
+        <el-form-item prop="name" label="角色名称">
+          <el-input v-model="roleForm.name" style="width:300px" size="mini" />
+        </el-form-item>
+        <el-form-item label="启用">
+          <!-- 如果不需要校验 就不需要写 prop属性 -->
+          <el-switch v-model="roleForm.state" :active-value="1" :inactive-value="0" size="mini" />
+        </el-form-item>
+        <el-form-item prop="description" label="角色描述">
+          <el-input v-model="roleForm.description" type="textarea" :rows="3" style="width:300px" size="mini" />
+        </el-form-item>
+        <el-form-item>
+          <el-row type="flex" justify="center">
+            <el-col :span="12">
+              <el-button type="primary" size="mini" @click="btnOK">确定</el-button>
+              <el-button size="mini" @click="btnCancel">取消</el-button>
+            </el-col>
+          </el-row>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
   </div>
 </template>
 <script>
-import { getRoleList } from '@/api/role'
+import { getRoleList, addRole, delRole } from '@/api/role'
 export default {
-  name: 'Role',
+  name: 'RoleIndex',
   data() {
     return {
       // 表格数据
+      showDialog: false,
       tableData: [
-      ]
+      ],
+      pageParams: {
+        page: 1, // 第几页
+        pagesize: 10, // 每页多少条
+        total: 0
+      },
+      roleForm: {
+        name: '',
+        description: '',
+        state: 0 // 默认未1启用 关闭 0 打开1
+      },
+      rules: {
+        name: [{ required: true, message: '角色名称不能为空', trigger: 'blur' }],
+        description: [{ required: true, message: '角色描述不能为空', trigger: 'blur' }]
+      }
     }
   },
   created() {
@@ -49,9 +118,58 @@ export default {
   methods: {
     // 获取角色列表
     async init() {
-      const { rows } = await getRoleList()
-      console.log(rows[0])
-      this.tableData = rows
+      const { rows, total } = await getRoleList(this.pageParams)
+      this.tableData = rows // 赋值数据
+      this.pageParams.total = total
+      this.tableData.forEach(item => {
+        this.$set(item, 'editFlag', false) // 添加一个属性 初始值为false
+      })
+    },
+    // 切换分页时 请求新的数据
+    changePage(newPage) {
+      this.pageParams.page = newPage // 赋值当前页码
+      this.init() // 重新请求数据
+    },
+    btnOK() {
+      this.$refs.roleForm.validate(async isOK => {
+        if (isOK) {
+          await addRole(this.roleForm)
+          this.$message.success('新增角色成功')
+          this.init()
+          this.btnCancel()
+        }
+      })
+    },
+    btnCancel() {
+      this.roleForm = {
+        name: '',
+        description: '',
+        state: 0 // 默认未1启用 关闭 0 打开1
+      }
+      this.$refs.roleForm.resetFields() // 重置表单数据
+      this.showDialog = false // 关闭弹层
+    },
+    del(id) {
+      this.$confirm('此操作将永久删除该角色, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async() => {
+        await delRole(id)
+        this.$message.success('删除角色成功')
+        this.init()
+      }).catch(() => {
+        this.$message.info('已取消删除')
+      })
+    },
+    edit(row) {
+      row.editFlag = true // 找到当前行 设置为true
+      // 当某一行的编辑状态被打开的时候, 其他行的编辑状态都应该被关闭
+      this.tableData.forEach(item => {
+        if (item.id !== row.id) {
+          item.editFlag = false
+        }
+      })
     }
   }
 }
