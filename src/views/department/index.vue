@@ -30,7 +30,7 @@
     </div>
     <!-- 放置弹层 -->
     <!-- 表示会接受子组件的事件  update:showDialog, 值 => 属性 -->
-    <add-dept :current-node-id="currentNodeId" :show-dialog.sync="showDialog" @updateDepartment="getDepartmentList" />
+    <add-dept ref="adddept" :current-node-id="currentNodeId" :show-dialog.sync="showDialog" @updateDepartment="getDepartmentList" />
   </div>
 </template>
 <script>
@@ -72,6 +72,10 @@ export default {
         // 编辑部门
         this.showDialog = true // 显示弹层
         this.currentNodeId = id
+        this.$nextTick(() => {
+          // 通过id获取部门详情
+          this.$refs.adddept.getDepartmentDetail()
+        })
       } else if (type === 'del') {
         // 删除部门
         this.$confirm('此操作将永久删除该部门, 是否继续?', '提示', {

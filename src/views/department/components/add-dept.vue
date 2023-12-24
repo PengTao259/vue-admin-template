@@ -37,7 +37,7 @@
   </el-dialog>
 </template>
 <script>
-import { getDepartmentList, getManagerList, addDepartment } from '@/api/department'
+import { getDepartmentList, getManagerList, addDepartment, getDepartmentDetail } from '@/api/department'
 export default {
   props: {
     showDialog: {
@@ -67,8 +67,13 @@ export default {
             // 自定义校验模式
             validator: async(rule, value, callback) => {
             // value就是输入的编码
-              const result = await getDepartmentList()
+              let result = await getDepartmentList()
               // result数组中是否存在 value值
+              // 判断是否存在id
+              if (this.formData.id) {
+                // 编辑场景
+                result = result.filter(item => item.id !== this.formData.id)
+              }
               if (result.some(item => item.code === value)) {
                 callback(new Error('部门中已经有该编码了'))
               } else {
@@ -132,6 +137,10 @@ export default {
           this.close()
         }
       })
+    },
+    async getDepartmentDetail() {
+      // 根据id获取部门详情
+      this.formData = await getDepartmentDetail(this.currentNodeId)
     }
   }
 }
