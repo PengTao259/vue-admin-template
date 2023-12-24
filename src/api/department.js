@@ -40,3 +40,12 @@ export function delDepartment(id) {
     method: 'delete'
   })
 }
+
+// 修改部门
+export function editDepartment(data) {
+  return request({
+    url: `/company/department/${data.id}`,
+    method: 'put',
+    data
+  })
+}

@@ -30,7 +30,7 @@
     </div>
     <!-- 放置弹层 -->
     <!-- 表示会接受子组件的事件  update:showDialog, 值 => 属性 -->
-    <add-dept ref="adddept" :current-node-id="currentNodeId" :show-dialog.sync="showDialog" @updateDepartment="getDepartmentList" />
+    <add-dept ref="adddept" :current-node-id="currentNodeId" :show-dialog.sync="showDialog" @updateDepartment="init" />
   </div>
 </template>
 <script>
@@ -53,11 +53,11 @@ export default {
     }
   },
   created() {
-    this.getDepartmentList() // 调用获取数据的接口
+    this.init() // 调用获取数据的接口
   },
   methods: {
     // 封装好方法
-    async getDepartmentList() {
+    async init() {
       const result = await getDepartmentList()
       // 列表数据转换成树形结构
       this.depts = getChild(result, 0)
@@ -85,7 +85,7 @@ export default {
         }).then(async() => {
           // 确认删除
           await delDepartment(id)
-          this.getDepartmentList()
+          this.init()
           Message.success('删除成功')
         }).catch(() => {
           // 取消删除

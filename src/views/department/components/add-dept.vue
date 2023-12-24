@@ -1,5 +1,5 @@
 <template>
-  <el-dialog title="新增部门" :visible="showDialog" @close="close">
+  <el-dialog :title="isEdit" :visible="showDialog" @close="close">
     <!-- 放置弹层内容 -->
     <el-form ref="addDept" :model="formData" :rules="rules" label-width="120px">
       <el-form-item prop="name" label="部门名称">
@@ -37,7 +37,13 @@
   </el-dialog>
 </template>
 <script>
-import { getDepartmentList, getManagerList, addDepartment, getDepartmentDetail } from '@/api/department'
+import {
+  getDepartmentList,
+  getManagerList,
+  addDepartment,
+  getDepartmentDetail,
+  editDepartment
+} from '@/api/department'
 export default {
   props: {
     showDialog: {
@@ -97,8 +103,12 @@ export default {
             // 自定义校验模式
             validator: async(rule, value, callback) => {
               // value就是输入的编码
-              const result = await getDepartmentList()
-              console.log(result, 'result')
+              let result = await getDepartmentList()
+              // 判断是否存在id
+              if (this.formData.id) {
+                // 编辑场景
+                result = result.filter(item => item.id !== this.formData.id)
+              }
               // result数组中是否存在 value值
               if (result.some(item => item.name === value)) {
                 callback(new Error('部门中已经有该名称了'))
@@ -112,6 +122,11 @@ export default {
       }
     }
   },
+  computed: {
+    isEdit() {
+      return this.formData.id ? '编辑部门' : '新增部门'
+    }
+  },
   created() {
     this.getManagerList()
   },
@@ -119,21 +134,34 @@ export default {
 
     close() {
       // 修改父组件的值 子传父
+      this.formData = {
+        code: '', // 部门编码
+        introduce: '', // 部门介绍
+        managerId: '', // 部门负责人id
+        name: '', // 部门名称
+        pid: '' // 父级部门的id
+      }
       this.$refs.addDept.resetFields() // 重置表单
       this.$emit('update:showDialog', false)
     },
     async getManagerList() {
       this.managerList = await getManagerList()
     },
-    // 点击确定时调用
     btnOK() {
       this.$refs.addDept.validate(async isOK => {
         if (isOK) {
-          await addDepartment({ ...this.formData, pid: this.currentNodeId })
+          let msg = '新增'
+          if (this.formData.id) {
+            // 编辑部门
+            msg = '更新'
+            await editDepartment(this.formData)
+          } else {
+            await addDepartment({ ...this.formData, pid: this.currentNodeId })
+          }
           // 通知父组件更新
-          this.$emit('updateDepartment')
+          this.$emit('init')
           // 提示消息
-          this.$message.success('新增部门成功')
+          this.$message.success(`${msg}部门成功`)
           this.close()
         }
       })

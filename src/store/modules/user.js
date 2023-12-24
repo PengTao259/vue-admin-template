@@ -29,6 +29,8 @@ const actions = {
   async getInfo({ commit }) {
     await getUserInfo().then(res => {
       commit('setUserInfo', res)
+    }).catch(() => {
+      commit('removeToken')
     })
   },
   // 退出登录
