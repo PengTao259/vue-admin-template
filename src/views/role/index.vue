@@ -31,15 +31,30 @@
             </span>
           </template>
         </el-table-column>
-        <el-table-column prop="description" align="center" label="描述" />
+        <el-table-column prop="description" align="center" label="描述">
+          <template v-slot="{ row }">
+            <el-input
+              v-if="row.editFlag"
+              v-model="row.description"
+              size="mini"
+              type="textarea"
+            />
+            <span v-else>{{ row.description }}</span>
+          </template></el-table-column>
         <el-table-column align="center" label="操作">
           <template v-slot="{ row }">
-            <el-button size="mini" type="primary" @click="edit(row)">{{ row.editFlag === false ? '编辑': '确认' }}</el-button>
-            <el-button
-              size="mini"
-              type="danger"
-              @click="del(row.id)"
-            >删除</el-button>
+            <template v-if="row.editFlag">
+              <el-button size="mini" type="text">确定</el-button>
+              <el-button size="mini" type="text">取消</el-button>
+            </template>
+            <template v-else>
+              <el-button size="mini" type="text" @click="edit(row)">{{ row.editFlag === false ? '编辑': '确认' }}</el-button>
+              <el-button
+                size="mini"
+                type="text"
+                @click="del(row.id)"
+              >删除</el-button>
+            </template>
           </template>
         </el-table-column>
       </el-table>
