@@ -47,8 +47,8 @@
         <el-table-column align="center" label="操作">
           <template v-slot="{ row }">
             <template v-if="row.editFlag">
-              <el-button size="mini" type="primary">确定</el-button>
-              <el-button size="mini" @click="editCancel">取消</el-button>
+              <el-button size="mini" type="primary" @click="btnEditOk(row)">确定</el-button>
+              <el-button size="mini" @click="editCancel(row)">取消</el-button>
             </template>
             <template v-else>
               <el-button size="mini" type="text" @click="edit(row)">{{ row.editFlag === false ? '编辑': '确认' }}</el-button>
@@ -105,7 +105,7 @@
   </div>
 </template>
 <script>
-import { getRoleList, addRole, delRole } from '@/api/role'
+import { getRoleList, addRole, delRole, updateRole } from '@/api/role'
 export default {
   name: 'RoleIndex',
   data() {
@@ -193,17 +193,33 @@ export default {
         description: row.description,
         state: row.state
       }
-      // 当某一行的编辑状态被打开的时候, 其他行的编辑状态都应该被关闭
-      this.tableData.forEach(item => {
-        if (item.id !== row.id) {
-          item.editFlag = false
-        }
-      })
     },
-    editCancel() {
-      this.tableData.forEach(item => {
-        item.editFlag = false
-      })
+    editCancel(row) {
+      row.editFlag = false // 找到当前行 设置为false
+    },
+    btnEditOk(row) {
+      console.log(row, 'row')
+      if (row.cacheData.name && row.cacheData.description) {
+        // 发送请求修改角色并且提示更新成功
+        updateRole({
+          id: row.id,
+          ...row.cacheData
+        }).then(() => {
+          this.$message.success('更新角色成功')
+          row.name = row.cacheData.name
+          row.description = row.cacheData.description
+          row.state = row.cacheData.state
+          row.editFlag = false
+          // Object.assign(row, {
+          //   ...row.cacheData,
+          //   editFlag: false
+          // })
+        }).catch(err => {
+          console.log(err)
+        })
+      } else {
+        this.$message.error('角色名称和角色描述不能为空')
+      }
     }
   }
 }
