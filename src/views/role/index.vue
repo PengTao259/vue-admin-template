@@ -15,7 +15,7 @@
             <!-- 条件判断 -->
             <el-input
               v-if="row.editFlag"
-              v-model="row.name"
+              v-model="row.cacheData.name"
               size="mini"
             />
             <span v-else>{{ row.name }}</span>
@@ -25,6 +25,9 @@
           <template v-slot="{ row }">
             <el-switch
               v-if="row.editFlag"
+              v-model="row.cacheData.state"
+              :active-value="1"
+              :inactive-value="0"
             />
             <span v-else>
               {{ row.state === 1 ? '启用' : row.state === 0 ? '禁用' : '无' }}
@@ -35,7 +38,7 @@
           <template v-slot="{ row }">
             <el-input
               v-if="row.editFlag"
-              v-model="row.description"
+              v-model="row.cacheData.description"
               size="mini"
               type="textarea"
             />
@@ -44,8 +47,8 @@
         <el-table-column align="center" label="操作">
           <template v-slot="{ row }">
             <template v-if="row.editFlag">
-              <el-button size="mini" type="text">确定</el-button>
-              <el-button size="mini" type="text">取消</el-button>
+              <el-button size="mini" type="primary">确定</el-button>
+              <el-button size="mini" @click="editCancel">取消</el-button>
             </template>
             <template v-else>
               <el-button size="mini" type="text" @click="edit(row)">{{ row.editFlag === false ? '编辑': '确认' }}</el-button>
@@ -138,6 +141,12 @@ export default {
       this.pageParams.total = total
       this.tableData.forEach(item => {
         this.$set(item, 'editFlag', false) // 添加一个属性 初始值为false
+        // 增加缓存数据
+        this.$set(item, 'cacheData', {
+          name: item.name,
+          description: item.description,
+          state: item.state
+        })
       })
     },
     // 切换分页时 请求新的数据
@@ -179,11 +188,21 @@ export default {
     },
     edit(row) {
       row.editFlag = true // 找到当前行 设置为true
+      row.cacheData = {
+        name: row.name,
+        description: row.description,
+        state: row.state
+      }
       // 当某一行的编辑状态被打开的时候, 其他行的编辑状态都应该被关闭
       this.tableData.forEach(item => {
         if (item.id !== row.id) {
           item.editFlag = false
         }
+      })
+    },
+    editCancel() {
+      this.tableData.forEach(item => {
+        item.editFlag = false
       })
     }
   }
