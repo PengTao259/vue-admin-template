@@ -8,7 +8,6 @@
       <!-- 放置table组件 -->
       <el-table
         :data="tableData"
-        class="gray-header"
       >
         <!-- 放置序号 -->
         <el-table-column width="50" label="序号">
