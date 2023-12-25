@@ -10,6 +10,12 @@
           placeholder="输入员工姓名全员搜索"
         />
         <!-- 树形组件 -->
+        <el-tree
+          :expand-on-click-node="false"
+          default-expand-all
+          :data="depts"
+          :props="defaultProps"
+        />
       </div>
       <div class="right">
         <el-row class="opeate-tools" type="flex" justify="end">
@@ -25,8 +31,31 @@
 </template>
 
 <script>
+import { getDepartmentList } from '@/api/department'
+import { getChild } from '@/utils'
 export default {
-  name: 'Employee'
+  name: 'Employee',
+  data() {
+    return {
+      departmentList: [],
+      // 树组件内容
+      depts: [], // 数据属性
+      defaultProps: {
+        label: 'name', // 要显示的字段的名字
+        children: 'children' // 读取子节点的字段名
+      }
+    }
+  },
+  created() {
+    this.init()
+  },
+  methods: {
+    // 封装好方法
+    async init() {
+      // 列表数据转换成树形结构
+      this.depts = getChild(await getDepartmentList(), 0)
+    }
+  }
 }
 </script>
 
