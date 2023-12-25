@@ -3,12 +3,13 @@
     <div class="app-container">
       <div class="left">
         <el-input
+          v-model="queryParams.keyword"
           style="margin-bottom:10px"
           type="text"
           prefix-icon="el-icon-search"
           size="small"
           placeholder="输入员工姓名全员搜索"
-          @current-change="selectNode"
+          @input="changeKeyword"
         />
         <!-- 树形组件 -->
         <el-tree
@@ -19,6 +20,7 @@
           :data="depts"
           :props="defaultProps"
           highlight-current
+          @current-change="selectNode"
         />
       </div>
       <div class="right">
@@ -29,7 +31,6 @@
         </el-row>
         <!-- 表格组件 -->
         <el-table
-          v-if="list.length"
           ref="form"
           v-loading="loading"
           :data="list"
@@ -60,12 +61,15 @@
             </template>
           </el-table-column>
         </el-table>
-        <el-empty v-else />
+
         <!-- 分页 -->
         <el-row style="height: 60px" align="middle" type="flex" justify="end">
           <el-pagination
             layout="total,prev, pager, next"
-            :total="1000"
+            :total="total"
+            :current-page="queryParams.page"
+            :page-size="queryParams.pagesize"
+            @current-change="changePage"
           />
         </el-row>
       </div>
@@ -90,9 +94,13 @@ export default {
         children: 'children' // 读取子节点的字段名
       },
       // 查询参数
-      queryInfo: {
-        departmentId: null
-      }
+      queryParams: {
+        departmentId: null,
+        page: 1, // 当前页码
+        pagesize: 10,
+        keyword: '' // 模糊搜索字段
+      },
+      total: 0 // 记录员工的总数
     }
   },
   created() {
@@ -102,12 +110,12 @@ export default {
     async init() {
       // 递归方法 将列表转化成树形
       this.depts = getChild(await getDepartmentList(), 0)
-      this.queryInfo.departmentId = this.depts[0].id
+      this.queryParams.departmentId = this.depts[0].id
       // 设置选中节点
       // 树组件渲染是异步的 等到更新完毕
       this.$nextTick(() => {
         // 此时意味着树渲染完毕
-        this.$refs.deptTree.setCurrentKey(this.queryInfo.departmentId)
+        this.$refs.deptTree.setCurrentKey(this.queryParams.departmentId)
       })
       // 这个时候参数 记录了id
       this.getTableList()
@@ -115,13 +123,30 @@ export default {
     // 获取员工列表的方法
     async getTableList() {
       this.loading = true
-      const { rows } = await getEmployeeList(this.queryInfo)
+      const { rows, total } = await getEmployeeList(this.queryParams)
+      this.total = total
       this.list = rows
       this.loading = false
     },
     selectNode(node) {
-      this.queryInfo.departmentId = node.id // 重新记录了参数
+      this.queryParams.departmentId = node.id // 重新记录了参数
+      this.queryParams.page = 1 // 设置第一页
       this.getTableList()
+    },
+    // 切换页码
+    changePage(newPage) {
+      this.queryParams.page = newPage // 赋值新页码
+      this.getTableList() // 查询数据
+    },
+    changeKeyword() {
+      console.log('123')
+      // 单位时间内只执行最后一次
+      // this的实例上赋值了一个timer的属性
+      clearTimeout(this.timer) // 清理上一次的定时器
+      this.timer = setTimeout(() => {
+        this.queryParams.page = 1
+        this.getTableList()
+      }, 400)
     }
   }
 }
