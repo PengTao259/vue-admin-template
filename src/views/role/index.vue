@@ -8,7 +8,14 @@
       <!-- 放置table组件 -->
       <el-table
         :data="tableData"
+        class="gray-header"
       >
+        <!-- 放置序号 -->
+        <el-table-column width="50" label="序号">
+          <template v-slot="{ $index }">
+            {{ $index + 1 + (pageParams.page - 1) * pageParams.pagesize }}
+          </template>
+        </el-table-column>
         <!-- 放置列 -->
         <el-table-column prop="name" align="center" width="200" label="角色">
           <template v-slot="{ row }">
@@ -95,7 +102,7 @@
         <el-form-item>
           <el-row type="flex" justify="center">
             <el-col :span="12">
-              <el-button type="primary" size="mini" @click="btnOK">确定</el-button>
+              <el-button type="primary" size="mini" :disabled="isSubmitting" @click="btnOK">确定</el-button>
               <el-button size="mini" @click="btnCancel">取消</el-button>
             </el-col>
           </el-row>
@@ -112,11 +119,12 @@ export default {
     return {
       // 表格数据
       showDialog: false,
+      isSubmitting: false,
       tableData: [
       ],
       pageParams: {
         page: 1, // 第几页
-        pagesize: 10, // 每页多少条
+        pagesize: 5, // 每页多少条
         total: 0
       },
       roleForm: {
@@ -134,6 +142,7 @@ export default {
     this.init()
   },
   methods: {
+
     // 获取角色列表
     async init() {
       const { rows, total } = await getRoleList(this.pageParams)
@@ -148,6 +157,7 @@ export default {
           state: item.state
         })
       })
+      return total
     },
     // 切换分页时 请求新的数据
     changePage(newPage) {
@@ -155,12 +165,25 @@ export default {
       this.init() // 重新请求数据
     },
     btnOK() {
-      this.$refs.roleForm.validate(async isOK => {
+      if (this.isSubmitting) {
+        return // 如果正在提交，则直接返回，不执行后续代码
+      }
+      this.isSubmitting = true // 开始提交
+      this.$refs.roleForm.validate(isOK => {
         if (isOK) {
-          await addRole(this.roleForm)
-          this.$message.success('新增角色成功')
-          this.init()
-          this.btnCancel()
+          addRole(this.roleForm).then(res => {
+            this.$message.success('添加角色成功')
+            // 更新数据获取最新总页数 添加数据后跳转到最后一页
+            this.init().then(total => {
+              this.pageParams.page = Math.ceil(total / this.pageParams.pagesize)
+              this.changePage(this.pageParams.page)
+            })
+            this.btnCancel()
+          }).catch(err => {
+            console.log(err)
+          }).finally(() => {
+            this.isSubmitting = false // 提交结束
+          })
         }
       })
     },
@@ -181,9 +204,13 @@ export default {
       }).then(async() => {
         await delRole(id)
         this.$message.success('删除角色成功')
+        // 如果删除的是当前页的最后一条数据，那么页码减1
+        if (this.tableData.length === 1 && this.pageParams.page > 1) {
+          this.pageParams.page--
+        }
         this.init()
-      }).catch(() => {
-        this.$message.info('已取消删除')
+      }).catch(err => {
+        console.log(err)
       })
     },
     edit(row) {
@@ -206,14 +233,10 @@ export default {
           ...row.cacheData
         }).then(() => {
           this.$message.success('更新角色成功')
-          row.name = row.cacheData.name
-          row.description = row.cacheData.description
-          row.state = row.cacheData.state
-          row.editFlag = false
-          // Object.assign(row, {
-          //   ...row.cacheData,
-          //   editFlag: false
-          // })
+          Object.assign(row, {
+            ...row.cacheData,
+            editFlag: false
+          })
         }).catch(err => {
           console.log(err)
         })
