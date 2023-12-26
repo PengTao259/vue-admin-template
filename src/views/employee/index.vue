@@ -25,7 +25,7 @@
       </div>
       <div class="right">
         <el-row class="opeate-tools" type="flex" justify="end">
-          <el-button size="mini" type="primary">添加员工</el-button>
+          <el-button size="mini" type="primary" @click="$router.push('/employee/detail')">添加员工</el-button>
           <el-button size="mini" @click="showExcelDialog = true">excel导入</el-button>
           <el-button size="mini" @click="exportEmp">excel导出</el-button>
         </el-row>
@@ -54,10 +54,12 @@
           <el-table-column prop="departmentName" label="部门" />
           <el-table-column prop="timeOfEntry" label="入职时间" sortable />
           <el-table-column label="操作" width="280px">
-            <template>
+            <template v-slot="{ row }">
               <el-button size="mini" type="text">查看</el-button>
               <el-button size="mini" type="text">角色</el-button>
-              <el-button size="mini" type="text">删除</el-button>
+              <el-popconfirm title="确认删除该行数据吗？" @onConfirm="confirmDel(row.id)">
+                <el-button slot="reference" style="margin-left:10px" size="mini" type="text">删除</el-button>
+              </el-popconfirm>
             </template>
           </el-table-column>
         </el-table>
@@ -80,7 +82,7 @@
 
 <script>
 import { getDepartmentList } from '@/api/department'
-import { exportEmployee, getEmployeeList } from '@/api/employee'
+import { exportEmployee, getEmployeeList, delEmployee } from '@/api/employee'
 import { getChild } from '@/utils'
 import fileSaver from 'file-saver'
 import ImportExcel from './components/import-excel.vue'
@@ -115,6 +117,13 @@ export default {
     this.init()
   },
   methods: {
+    // 删除员工方法
+    async confirmDel(id) {
+      await delEmployee(id)
+      if (this.list.length === 1 && this.queryParams.page > 1) this.queryParams.page--
+      this.getTableList()
+      this.$message.success('删除员工成功')
+    },
     async init() {
       // 递归方法 将列表转化成树形
       this.depts = getChild(await getDepartmentList(), 0)
