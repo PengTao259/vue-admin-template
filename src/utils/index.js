@@ -129,7 +129,7 @@ export function getChild(list, rootValue) {
     if (item.pid === rootValue) {
       arr.push(item)
       const children = getChild(list, item.id)
-      item.children = children
+      if (children.length > 0) { item.children = children }
     }
   })
 

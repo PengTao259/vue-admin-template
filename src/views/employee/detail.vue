@@ -37,6 +37,7 @@
             <el-col :span="12">
               <el-form-item label="部门" prop="departmentId">
                 <!-- 放置及联部门组件 会单独封装-->
+                <selectTree class="inputW" />
               </el-form-item>
             </el-col>
           </el-row>
@@ -97,8 +98,11 @@
 </template>
 
 <script>
-
+import selectTree from './components/select-tree'
 export default {
+  components: {
+    selectTree
+  },
   data() {
     return {
       userInfo: {
@@ -127,7 +131,7 @@ export default {
           validator: (rule, value, callback) => {
             if (this.userInfo.timeOfEntry) {
               if (new Date(this.userInfo.timeOfEntry) > new Date(value)) {
-                callback(new Error('转正时间不能小于入职时间'))
+                callback(new Error('转正时间不能小于或等于入职时间'))
                 return
               }
             }
