@@ -4,7 +4,7 @@ import store from '@/store'
 import router from '@/router'
 const service = axios.create({
   baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
-  timeout: 10000 // 请求超时时间
+  timeout: 20000 // 请求超时时间
 })
 
 // 请求拦截器
@@ -25,8 +25,13 @@ service.interceptors.request.use(
 // 响应拦截器
 service.interceptors.response.use(
   response => {
+    if (response.config.responseType === 'blob' || response.config.responseType === 'arraybuffer') {
+      return response.data
+    }
     // 对响应数据做点什么
-    const { data, message, success } = response.data
+    const { data, message, success } = response.data // 默认json格式
+    // 判断是否blob类型
+
     if (success) {
       return data
     } else {

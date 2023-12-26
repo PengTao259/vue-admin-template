@@ -26,8 +26,8 @@
       <div class="right">
         <el-row class="opeate-tools" type="flex" justify="end">
           <el-button size="mini" type="primary">添加员工</el-button>
-          <el-button size="mini">excel导入</el-button>
-          <el-button size="mini">excel导出</el-button>
+          <el-button size="mini" @click="showExcelDialog = true">excel导入</el-button>
+          <el-button size="mini" @click="exportEmp">excel导出</el-button>
         </el-row>
         <!-- 表格组件 -->
         <el-table
@@ -74,19 +74,27 @@
         </el-row>
       </div>
     </div>
+    <import-excel :show-excel-dialog.sync="showExcelDialog" @uploadSuccess="getTableList" />
   </div>
 </template>
 
 <script>
-import { getDepartmentList, getEmployeeList } from '@/api/department'
+import { getDepartmentList } from '@/api/department'
+import { exportEmployee, getEmployeeList } from '@/api/employee'
 import { getChild } from '@/utils'
+import fileSaver from 'file-saver'
+import ImportExcel from './components/import-excel.vue'
 export default {
   name: 'Employee',
+  components: {
+    ImportExcel
+  },
   data() {
     return {
       departmentList: [],
       list: [],
       loading: false,
+      showExcelDialog: false, // 控制excel的弹层显示和隐藏
       // 树组件内容
       depts: [], // 数据属性
       defaultProps: {
@@ -147,6 +155,11 @@ export default {
         this.queryParams.page = 1
         this.getTableList()
       }, 400)
+    },
+    // 导出员工
+    async exportEmp() {
+      const res = await exportEmployee()
+      fileSaver.saveAs(res, '员工列表.xlsx')
     }
   }
 }
