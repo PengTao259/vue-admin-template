@@ -166,6 +166,7 @@ export default {
             this.$message.success('更新员工成功')
           } else {
             // 新增模式
+            console.log('123')
             // 校验通过
             await addEmployee(this.userInfo)
             this.$message.success('新增员工成功')
