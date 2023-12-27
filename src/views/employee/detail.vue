@@ -119,7 +119,8 @@ export default {
         formOfEmployment: null, // 聘用形式
         departmentId: null, // 部门id
         timeOfEntry: '', // 入职时间
-        correctionTime: '' // 转正时间
+        correctionTime: '', // 转正时间
+        staffPhoto: '' // 员工照片
       },
       rules: {
         username: [
@@ -156,18 +157,19 @@ export default {
   },
   methods: {
     saveData() {
-      this.$refs.userForm.validate(async isValid => {
-        if (isValid) {
+      this.$refs.userForm.validate(async isOK => {
+        if (isOK) {
+          // 编辑模式
           if (this.$route.params.id) {
-            // 编辑
+            // 编辑模式
             await updateEmployee(this.userInfo)
             this.$message.success('更新员工成功')
           } else {
-            // 新增
+            // 新增模式
+            // 校验通过
             await addEmployee(this.userInfo)
+            this.$message.success('新增员工成功')
           }
-        } else {
-          this.$message.success('新增员工成功')
           this.$router.push('/employee')
         }
       })
