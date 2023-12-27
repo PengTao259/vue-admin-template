@@ -29,6 +29,7 @@
                   v-model="userInfo.mobile"
                   size="mini"
                   class="inputW"
+                  :disabled="!!this.$route.params.id"
                 />
               </el-form-item>
             </el-col>
@@ -81,6 +82,9 @@
             <el-col :span="12">
               <el-form-item label="员工头像">
                 <!-- 放置上传图片 -->
+                <ImageUpload
+                  v-model="userInfo.staffPhoto"
+                />
               </el-form-item>
             </el-col>
           </el-row>
@@ -99,9 +103,12 @@
 
 <script>
 import selectTree from './components/select-tree'
+import ImageUpload from './components/image-upload'
+import { addEmployee, getEmployeeDetail, updateEmployee } from '@/api/employee'
 export default {
   components: {
-    selectTree
+    selectTree,
+    ImageUpload
   },
   data() {
     return {
@@ -115,9 +122,10 @@ export default {
         correctionTime: '' // 转正时间
       },
       rules: {
-        username: [{ required: true, message: '请输入姓名', trigger: 'blur' }, {
-          min: 1, max: 4, message: '姓名为1-4位'
-        }],
+        username: [
+          { required: true, message: '请输入姓名', trigger: 'blur' },
+          { min: 1, max: 5, message: '姓名为1-5位' }
+        ],
         mobile: [{ required: true, message: '请输入手机号', trigger: 'blur' }, {
           //   pattern 正则表达式
           pattern: /^1[3-9]\d{9}$/,
@@ -142,9 +150,33 @@ export default {
 
     }
   },
+  created() {
+    // 获取路由参数
+    this.$route.params.id && this.getUserInfo(this.$route.params.id)
+  },
   methods: {
     saveData() {
-      this.$refs.userForm.validate()
+      this.$refs.userForm.validate(async isValid => {
+        if (isValid) {
+          if (this.$route.params.id) {
+            // 编辑
+            await updateEmployee(this.userInfo)
+            this.$message.success('更新员工成功')
+          } else {
+            // 新增
+            await addEmployee(this.userInfo)
+          }
+        } else {
+          this.$message.success('新增员工成功')
+          this.$router.push('/employee')
+        }
+      })
+    },
+    getUserInfo(id) {
+      getEmployeeDetail(id).then(res => {
+        console.log(res, 'res')
+        this.userInfo = res
+      })
     }
   }
 }

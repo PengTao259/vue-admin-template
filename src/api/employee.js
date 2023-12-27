@@ -62,3 +62,38 @@ export function delEmployee(id) {
     url: `/sys/user/${id}`
   })
 }
+
+/**
+ * 新增员工
+ * **/
+
+export function addEmployee(data) {
+  return request({
+    method: 'post',
+    url: '/sys/user',
+    data
+  })
+}
+
+/**
+ * 获取员工基本信息
+ * **/
+
+export function getEmployeeDetail(id) {
+  return request({
+    method: 'GET',
+    url: `/sys/user/${id}`
+  })
+}
+
+/**
+ * 更新员工基本信息
+ * **/
+
+export function updateEmployee(data) {
+  return request({
+    method: 'PUT',
+    url: `/sys/user/${data.id}`,
+    data
+  })
+}
