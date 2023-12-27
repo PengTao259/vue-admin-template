@@ -217,7 +217,7 @@ export default {
     },
     async btnOk() {
       await assignRole({
-        userId: this.currentEmpId,
+        id: this.currentEmpId,
         roleIds: this.roleIds
       })
       this.showRoleDialog = false
