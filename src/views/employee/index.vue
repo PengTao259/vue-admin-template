@@ -60,7 +60,7 @@
                 type="text"
                 @click="$router.push(`/employee/detail/${row.id}`)"
               >查看</el-button>
-              <el-button size="mini" type="text">角色</el-button>
+              <el-button size="mini" type="text" @click="btnRole(row.id)">角色</el-button>
               <el-popconfirm title="确认删除该行数据吗？" @onConfirm="confirmDel(row.id)">
                 <el-button slot="reference" style="margin-left:10px" size="mini" type="text">删除</el-button>
               </el-popconfirm>
@@ -81,12 +81,33 @@
       </div>
     </div>
     <import-excel :show-excel-dialog.sync="showExcelDialog" @uploadSuccess="getTableList" />
+    <el-dialog
+      :visible.sync="showRoleDialog"
+      title="分配角色"
+    >
+      <el-checkbox-group v-model="roleIds">
+        <el-checkbox
+          v-for="item in roleList"
+          :key="item.id"
+          :label="item.id"
+        >{{ item.name }}</el-checkbox>
+      </el-checkbox-group>
+      <el-row
+        type="flex"
+        align="middle"
+      >
+        <el-col :span="6">
+          <el-button size="mini">确认</el-button>
+          <el-button size="mini">取消</el-button>
+        </el-col>
+      </el-row>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import { getDepartmentList } from '@/api/department'
-import { exportEmployee, getEmployeeList, delEmployee } from '@/api/employee'
+import { exportEmployee, getEmployeeList, delEmployee, getRoleList, getEmployeeDetail } from '@/api/employee'
 import { getChild } from '@/utils'
 import fileSaver from 'file-saver'
 import ImportExcel from './components/import-excel.vue'
@@ -101,6 +122,7 @@ export default {
       list: [],
       loading: false,
       showExcelDialog: false, // 控制excel的弹层显示和隐藏
+      showRoleDialog: false, // 控制角色的弹层显示和隐藏
       // 树组件内容
       depts: [], // 数据属性
       defaultProps: {
@@ -114,7 +136,10 @@ export default {
         pagesize: 10,
         keyword: '' // 模糊搜索字段
       },
-      total: 0 // 记录员工的总数
+      total: 0, // 记录员工的总数
+      roleList: [], // 角色列表
+      roleIds: [], // 选中的角色id
+      currentEmpId: null // 当前员工的id
     }
   },
   created() {
@@ -173,6 +198,14 @@ export default {
     async exportEmp() {
       const res = await exportEmployee()
       fileSaver.saveAs(res, '员工列表.xlsx')
+    },
+    // 分配角色
+    async btnRole(id) {
+      this.roleList = await getRoleList(id)
+      this.currentEmpId = id
+      const { roleIds } = await getEmployeeDetail(id)
+      this.roleIds = roleIds
+      this.showRoleDialog = true
     }
   }
 }
