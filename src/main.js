@@ -14,6 +14,7 @@ import router from './router'
 
 import '@/icons' // icon
 import '@/permission' // permission control
+import '@/utils/validate.js'
 
 /**
  * If you don't want to use mock-server

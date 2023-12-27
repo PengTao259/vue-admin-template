@@ -84,6 +84,7 @@
     <el-dialog
       :visible.sync="showRoleDialog"
       title="分配角色"
+      @close="showRoleDialog = false"
     >
       <el-checkbox-group v-model="roleIds">
         <el-checkbox
@@ -93,12 +94,20 @@
         >{{ item.name }}</el-checkbox>
       </el-checkbox-group>
       <el-row
+        slot="footer"
         type="flex"
-        align="middle"
+        justify="center"
       >
         <el-col :span="6">
-          <el-button size="mini">确认</el-button>
-          <el-button size="mini">取消</el-button>
+          <el-button
+            size="mini"
+            type="primary"
+            @click="btnOk()"
+          >确认</el-button>
+          <el-button
+            size="mini"
+            @click="showRoleDialog = false"
+          >取消</el-button>
         </el-col>
       </el-row>
     </el-dialog>
@@ -107,7 +116,7 @@
 
 <script>
 import { getDepartmentList } from '@/api/department'
-import { exportEmployee, getEmployeeList, delEmployee, getRoleList, getEmployeeDetail } from '@/api/employee'
+import { exportEmployee, getEmployeeList, delEmployee, getRoleList, getEmployeeDetail, assignRole } from '@/api/employee'
 import { getChild } from '@/utils'
 import fileSaver from 'file-saver'
 import ImportExcel from './components/import-excel.vue'
@@ -185,7 +194,6 @@ export default {
       this.getTableList() // 查询数据
     },
     changeKeyword() {
-      console.log('123')
       // 单位时间内只执行最后一次
       // this的实例上赋值了一个timer的属性
       clearTimeout(this.timer) // 清理上一次的定时器
@@ -206,6 +214,14 @@ export default {
       const { roleIds } = await getEmployeeDetail(id)
       this.roleIds = roleIds
       this.showRoleDialog = true
+    },
+    async btnOk() {
+      await assignRole({
+        userId: this.currentEmpId,
+        roleIds: this.roleIds
+      })
+      this.showRoleDialog = false
+      this.$message.success('分配角色成功')
     }
   }
 }
