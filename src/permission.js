@@ -2,6 +2,9 @@ import router from './router'
 import NProgress from 'nprogress' // progress bar
 import 'nprogress/nprogress.css' // progress bar style
 import store from '@/store'
+import {
+  asyncRoputes
+} from '@/router'
 
 /**
  * 前置守卫
@@ -18,7 +21,11 @@ router.beforeEach(async(to, from, next) => {
     } else {
       // 判断是否获取过用户信息
       if (!store.getters.userId) {
-        await store.dispatch('user/getInfo')
+        const { roles: { menus }} = await store.dispatch('user/getInfo')
+        const filterRoutes = asyncRoputes.filter(item => {
+          return menus.includes(item.name)
+        })
+        console.log(filterRoutes, 'filterRoutes')
       }
       next()
     }

@@ -27,10 +27,9 @@ const actions = {
   },
   // 获取用户信息
   async getInfo({ commit }) {
-    await getUserInfo().then(res => {
+    return await getUserInfo().then(res => {
       commit('setUserInfo', res)
-    }).catch(() => {
-      commit('removeToken')
+      return res
     })
   },
   // 退出登录
