@@ -57,6 +57,7 @@
               <el-button size="mini" @click="editCancel(row)">取消</el-button>
             </template>
             <template v-else>
+              <el-button size="mini" type="text" @click="btnPermission(row.id)">分配权限</el-button>
               <el-button size="mini" type="text" @click="edit(row)">{{ row.editFlag === false ? '编辑': '确认' }}</el-button>
               <el-button
                 size="mini"
@@ -108,10 +109,23 @@
         </el-form-item>
       </el-form>
     </el-dialog>
+    <!-- 放置权限弹层 -->
+    <el-dialog :visible.sync="showPermissionDialog" title="分配权限">
+      <!-- 放置权限数据 -->
+      <el-tree
+        :data="permissionData"
+        :props="{ label: 'name' }"
+        show-checkbox
+        default-expand-all
+        :default-checked-keys="permIds"
+      />
+    </el-dialog>
   </div>
 </template>
 <script>
-import { getRoleList, addRole, delRole, updateRole } from '@/api/role'
+import { getRoleList, addRole, delRole, updateRole, getRoleDetail } from '@/api/role'
+import { getPermissionList } from '@/api/permission'
+import { getChild } from '@/utils'
 export default {
   name: 'RoleIndex',
   data() {
@@ -119,6 +133,9 @@ export default {
       // 表格数据
       showDialog: false,
       isSubmitting: false,
+      showPermissionDialog: false,
+      permissionData: [],
+      permIds: [],
       tableData: [
       ],
       pageParams: {
@@ -143,6 +160,13 @@ export default {
   methods: {
 
     // 获取角色列表
+    async  btnPermission(id) {
+      this.currentRoleId = id
+      const { permIds } = await getRoleDetail(id)
+      this.permIds = permIds
+      this.permissionData = getChild(await getPermissionList(), 0)
+      this.showPermissionDialog = true
+    },
     async init() {
       const { rows, total } = await getRoleList(this.pageParams)
       this.tableData = rows // 赋值数据
