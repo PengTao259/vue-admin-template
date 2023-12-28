@@ -113,6 +113,7 @@
     <el-dialog :visible.sync="showPermissionDialog" title="分配权限">
       <!-- 放置权限数据 -->
       <el-tree
+        node-key="id"
         :data="permissionData"
         :props="{ label: 'name' }"
         show-checkbox
@@ -135,6 +136,7 @@ export default {
       isSubmitting: false,
       showPermissionDialog: false,
       permissionData: [],
+      currentRoleId: null,
       permIds: [],
       tableData: [
       ],
@@ -163,6 +165,7 @@ export default {
     async  btnPermission(id) {
       this.currentRoleId = id
       const { permIds } = await getRoleDetail(id)
+      console.log(permIds, 'permIds')
       this.permIds = permIds
       this.permissionData = getChild(await getPermissionList(), 0)
       this.showPermissionDialog = true
