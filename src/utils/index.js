@@ -135,3 +135,16 @@ export function getChild(list, rootValue) {
 
   return arr
 }
+
+// 遍历路由信息
+export function filterAsyncRoutes(routes, menus) {
+  return routes.filter(route => {
+    if (menus.includes(route.name)) {
+      if (route.children && route.children.length) {
+        route.children = filterAsyncRoutes(route.children, menus)
+      }
+      return true
+    }
+    return false
+  })
+}

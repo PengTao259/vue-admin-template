@@ -1,8 +1,11 @@
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import { userLogin, getUserInfo } from '@/api/user'
+import { constantRoutes } from '@/router'
+import { resetRouter } from '@/router'
 const state = {
   token: getToken(), // 从缓存中读取初始值
-  userInfo: {}
+  userInfo: {},
+  rotes: constantRoutes // 静态路由表
 }
 
 const mutations = {
@@ -17,6 +20,9 @@ const mutations = {
   removeToken(state) {
     state.token = null
     removeToken() // 同步删除缓存
+  },
+  setRotes(state, rotes) {
+    state.rotes = constantRoutes.concat(rotes)
   }
 }
 
@@ -37,6 +43,7 @@ const actions = {
     commit('removeToken')
     // 清除用户信息
     commit('setUserInfo', {})
+    resetRouter()
   }
 }
 

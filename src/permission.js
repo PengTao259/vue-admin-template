@@ -2,9 +2,7 @@ import router from './router'
 import NProgress from 'nprogress' // progress bar
 import 'nprogress/nprogress.css' // progress bar style
 import store from '@/store'
-import {
-  asyncRoputes
-} from '@/router'
+import { asyncRoputes } from '@/router'
 
 /**
  * 前置守卫
@@ -22,12 +20,18 @@ router.beforeEach(async(to, from, next) => {
       // 判断是否获取过用户信息
       if (!store.getters.userId) {
         const { roles: { menus }} = await store.dispatch('user/getInfo')
+        // 筛选出动态路由并添加到路由表
         const filterRoutes = asyncRoputes.filter(item => {
           return menus.includes(item.name)
         })
-        console.log(filterRoutes, 'filterRoutes')
+        store.commit('user/setRotes', filterRoutes)
+        // 添加路由信息到路由表
+        router.addRoutes([...filterRoutes, { path: '*', redirect: '/404', hidden: true }])
+        // 添加后需要重新跳转一次 否则会报错
+        next(to.path)
+      } else {
+        next()
       }
-      next()
     }
   } else {
     // 没有token
