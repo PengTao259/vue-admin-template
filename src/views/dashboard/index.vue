@@ -23,7 +23,7 @@
               <!-- 起始值 终点值  滚动时间 -->
               <CountTo
                 :start-val="0"
-                :end-val="228"
+                :end-val="homeData.employeeTotal"
                 :duration="1000"
               />
             </div>
@@ -31,7 +31,7 @@
               <span>正式员工</span>
               <CountTo
                 :start-val="0"
-                :end-val="334"
+                :end-val="homeData.regularEmployeeTotal"
                 :duration="1000"
               />
             </div>
@@ -47,7 +47,7 @@
               <span>待入职</span>
               <CountTo
                 :start-val="0"
-                :end-val="890"
+                :end-val="homeData.contractSignTotal"
                 :duration="1000"
               />
             </div>
@@ -55,7 +55,7 @@
               <span>本月待转正</span>
               <CountTo
                 :start-val="0"
-                :end-val="228"
+                :end-val="homeData.toBeConfirmed"
                 :duration="1000"
               />
             </div>
@@ -63,7 +63,7 @@
               <span>本月待离职</span>
               <CountTo
                 :start-val="0"
-                :end-val="228"
+                :end-val="homeData.toBeDismissed"
                 :duration="1000"
               />
             </div>
@@ -71,7 +71,7 @@
               <span>接口总访问</span>
               <CountTo
                 :start-val="0"
-                :end-val="228"
+                :end-val="homeData.interfaceAccessTotal"
                 :duration="1000"
               />
             </div>
@@ -112,7 +112,7 @@
                 <span>申报人数</span>
                 <CountTo
                   :start-val="0"
-                  :end-val="228"
+                  :end-val="homeData.socialInsurance?.declarationTotal"
                   :duration="1000"
                 />
               </div>
@@ -121,7 +121,7 @@
                   <span>待申报(人)</span>
                   <CountTo
                     :start-val="0"
-                    :end-val="228"
+                    :end-val="homeData.socialInsurance?.toDeclareTotal"
                     :duration="1000"
                   />
                 </div>
@@ -129,7 +129,7 @@
                   <span>申报中(人)</span>
                   <CountTo
                     :start-val="0"
-                    :end-val="228"
+                    :end-val="homeData.socialInsurance?.declaringTotal"
                     :duration="1000"
                   />
                 </div>
@@ -137,7 +137,7 @@
                   <span>已申报(人)</span>
                   <CountTo
                     :start-val="0"
-                    :end-val="228"
+                    :end-val="homeData.socialInsurance?.declaredTotal"
                     :duration="1000"
                   />
                 </div>
@@ -145,6 +145,7 @@
             </div>
             <div class="chart">
               <!-- 图表 -->
+              <div ref="social" style="height: 100%;width: 100%;" />
             </div>
           </div>
         </div>
@@ -157,7 +158,7 @@
                 <span>申报人数</span>
                 <CountTo
                   :start-val="0"
-                  :end-val="228"
+                  :end-val="homeData.providentFund?.declarationTotal"
                   :duration="1000"
                 />
               </div>
@@ -166,7 +167,7 @@
                   <span>待申报(人)</span>
                   <CountTo
                     :start-val="0"
-                    :end-val="228"
+                    :end-val="homeData.providentFund?.toDeclareTotal"
                     :duration="1000"
                   />
                 </div>
@@ -174,7 +175,7 @@
                   <span>申报中(人)</span>
                   <CountTo
                     :start-val="0"
-                    :end-val="228"
+                    :end-val="homeData.providentFund?.declaringTotal"
                     :duration="1000"
                   />
                 </div>
@@ -182,7 +183,7 @@
                   <span>已申报(人)</span>
                   <CountTo
                     :start-val="0"
-                    :end-val="228"
+                    :end-val="homeData.providentFund?.declaredTotal"
                     :duration="1000"
                   />
                 </div>
@@ -190,6 +191,8 @@
             </div>
             <div class="chart">
               <!-- 图表 -->
+              <div ref="provide" style="height: 100%;width: 100%;" />
+
             </div>
           </div>
         </div>
@@ -232,36 +235,24 @@
         <div class="panel">
           <div class="panel-title">通知公告</div>
           <div class="information-list">
-            <div class="information-list-item">
-              <img src="@/assets/common/img.jpeg" alt="">
+            <div
+              v-for="(item, index) in messageList"
+              :key="index"
+              class="information-list-item"
+            >
+              <img
+                :src="item.icon"
+                alt=""
+              >
               <div>
                 <p>
-                  <span class="col">朱继柳</span> 发布了
-                  第1期“传智大讲堂”互动讨论获奖名单公布
+                  <span class="col">{{ item.notice.match(/\S+/g)[0] }}</span> 发布了
+                  {{ item.notice.match(/\S+/g)[2] }}
                 </p>
-                <p>2018-07-21 15:21:38</p>
+                <p>{{ item.createTime }}</p>
               </div>
             </div>
-            <div class="information-list-item">
-              <img src="@/assets/common/img.jpeg" alt="">
-              <div>
-                <p>
-                  <span class="col">朱继柳</span> 发布了
-                  第1期“传智大讲堂”互动讨论获奖名单公布
-                </p>
-                <p>2018-07-21 15:21:38</p>
-              </div>
-            </div>
-            <div class="information-list-item">
-              <img src="@/assets/common/img.jpeg" alt="">
-              <div>
-                <p>
-                  <span class="col">朱继柳</span> 发布了
-                  第1期“传智大讲堂”互动讨论获奖名单公布
-                </p>
-                <p>2018-07-21 15:21:38</p>
-              </div>
-            </div>
+
           </div>
         </div>
       </div>
@@ -272,12 +263,88 @@
 <script>
 import { mapGetters } from 'vuex'
 import CountTo from 'vue-count-to'
+import { getHomeData, getNotice } from '@/api/home'
+import * as echarts from 'echarts'
 export default {
   components: {
     CountTo
   },
+  data() {
+    return {
+      homeData: {},
+      messageList: []
+    }
+  },
   computed: {
     ...mapGetters(['name', 'avatar', 'company', 'departmentName'])
+  },
+  watch: {
+    homeData() {
+      console.log(this.homeData)
+      // 设置图表
+      this.social.setOption({
+        xAxis: {
+          type: 'category',
+          boundaryGap: false,
+          data: this.homeData.socialInsurance?.xAxis
+        },
+        yAxis: {
+          type: 'value'
+        },
+        series: [
+          {
+            data: this.homeData.socialInsurance?.yAxis,
+            type: 'line',
+            areaStyle: {
+              color: '#04c9be' // 填充颜色
+            },
+            lineStyle: {
+              color: '#04c9be' // 线的颜色
+            }
+          }
+        ]
+      })
+      this.provide.setOption({
+        xAxis: {
+          type: 'category',
+          boundaryGap: false,
+          data: this.homeData.providentFund?.xAxis
+        },
+        yAxis: {
+          type: 'value'
+        },
+        series: [
+          {
+            data: this.homeData.providentFund?.yAxis,
+            type: 'line',
+            areaStyle: {
+              color: '#04c9be' // 填充颜色
+            },
+            lineStyle: {
+              color: '#04c9be' // 线的颜色
+            }
+          }
+        ]
+      })
+    }
+  },
+  created() {
+    this.getHomeData()
+    this.getNotice()
+  },
+  mounted() {
+    this.social = echarts.init(this.$refs.social) // 初始化echart
+    this.provide = echarts.init(this.$refs.provide) // 初始化echart
+    // console.log(social, 'social')
+  },
+  methods: {
+    async getHomeData() {
+      this.homeData = await getHomeData()
+    },
+    async getNotice() {
+      this.messageList = await getNotice()
+    }
+
   }
 }
 </script>
@@ -357,10 +424,14 @@ export default {
         margin-top: 0;
       }
     }
+    .social-panel {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
 
+    }
     .panel {
       background-color: #fff;
-
       margin-top: 8px;
       padding: 20px;
 

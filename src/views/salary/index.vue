@@ -101,7 +101,7 @@
 </template>
 <script>
 import { getTips, getSalaryDetail } from '@/api/salary'
-import { getDepartmentList } from '@/api/department'
+import { getDepartment } from '@/api/department'
 import ChangeSalary from './components/change-salary'
 import FixedSalary from './components/fixed-salary'
 import pageTools from './components/page-tools.vue'
@@ -165,7 +165,7 @@ export default {
   },
   created() {
     this.getEmployeeList() // 获取工资
-    this.getDepartmentList() // 获取组织
+    this.getDepartment() // 获取组织
   },
   methods: {
     getMoney() {
@@ -186,8 +186,8 @@ export default {
       this.loading = false
     },
     // 获取组织列表
-    async  getDepartmentList() {
-      this.departments = await getDepartmentList()
+    async  getDepartment() {
+      this.departments = await getDepartment()
     },
     async getTips() {
       const { tipsRes } = await getTips()
