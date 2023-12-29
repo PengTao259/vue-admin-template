@@ -7,7 +7,7 @@
           <!-- 个人信息 -->
           <div class="user-info">
             <img v-if="avatar" class="avatar" :src="avatar" alt="">
-            <span v-else>{{ name.charAt(0) }}</span>
+            <span v-else class="username">{{ name?.charAt(0) }}</span>
             <div class="company-info">
               <div class="title">
                 {{ company }}
