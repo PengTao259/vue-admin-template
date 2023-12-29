@@ -24,3 +24,11 @@ export function updatePassword(data) {
     data
   })
 }
+
+// 查询用户薪资
+export function getUserDetailById(userId) {
+  return request({
+    url: `/salarys/modify/${userId}`,
+    method: 'get'
+  })
+}
