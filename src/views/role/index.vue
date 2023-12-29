@@ -3,7 +3,12 @@
     <div class="app-container">
       <!-- 角色管理内容 -->
       <div class="role-operate">
-        <el-button size="mini" type="primary" @click="showDialog = true">添加角色</el-button>
+        <el-button
+          v-permission="'add-role'"
+          size="mini"
+          type="primary"
+          @click="showDialog = true"
+        >添加角色</el-button>
       </div>
       <!-- 放置table组件 -->
       <el-table
